@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Staffing Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+    <style>
+        .level-badge {
+            @apply px-2 py-1 rounded-full text-xs font-medium;
+        }
+        .level-i5 { @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200; }
+        .level-i6 { @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200; }
+        .level-i7 { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200; }
+        .level-i8 { @apply bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200; }
+        .level-i9 { @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200; }
+        .level-i10 { @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Smart Staffing Tool</h1>
+            <p class="text-gray-600 dark:text-gray-400">Optimize team composition based on experience levels and collaboration history</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Team Members Panel -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Team Members</h2>
+                        <button onclick="showAddMemberModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Add Member
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Level</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Project Requirements -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Project Requirements</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project Name</label>
+                            <input type="text" id="projectName" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base" placeholder="Enter project name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Team Size</label>
+                            <input type="number" id="teamSize" min="1" max="20" value="5" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Must Have Lead</label>
+                            <select id="requireLead" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                                <option value="true">Yes (i9/i10)</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Analysts (i5)</label>
+                            <input type="number" id="i5Count" min="0" value="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sr. Analysts (i6)</label>
+                            <input type="number" id="i6Count" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Advisors (i7)</label>
+                            <input type="number" id="i7Count" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sr. Advisors (i8)</label>
+                            <input type="number" id="i8Count" min="0" value="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Consultants (i9)</label>
+                            <input type="number" id="i9Count" min="0" value="1" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sr. Consultants (i10)</label>
+                            <input type="number" id="i10Count" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        </div>
+                    </div>
+
+                    <button onclick="generateTeamSuggestions()" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium">
+                        Generate Team Suggestions
+                    </button>
+                </div>
+
+                <!-- Team Suggestions -->
+                <div id="suggestionsPanel" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hidden">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Team Suggestions</h2>
+                    <div id="suggestionsContainer"></div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Collaboration History -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Collaboration History</h2>
+                        <button onclick="showCollaborationModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                            Add
+                        </button>
+                    </div>
+                    
+                    <div id="collaborationList" class="space-y-2 max-h-64 overflow-y-auto">
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Team Statistics</h2>
+                    <div id="teamStats" class="space-y-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Team Member</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
+                    <input type="text" id="memberName" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base" placeholder="Enter member name">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level</label>
+                    <select id="memberLevel" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                        <option value="i5">i5 - Analyst</option>
+                        <option value="i6">i6 - Senior Analyst</option>
+                        <option value="i7">i7 - Advisor</option>
+                        <option value="i8">i8 - Senior Advisor</option>
+                        <option value="i9">i9 - Consultant (Lead)</option>
+                        <option value="i10">i10 - Senior Consultant (Lead)</option>
+                    </select>
+                </div>
+                
+
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeAddMemberModal()" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Cancel</button>
+                <button onclick="addMember()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded">Add Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaboration Modal -->
+    <div id="collaborationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Collaboration History</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member 1</label>
+                    <select id="collab1" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member 2</label>
+                    <select id="collab2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Collaboration Date</label>
+                    <input type="date" id="collabDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeCollaborationModal()" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Cancel</button>
+                <button onclick="addCollaboration()" class="px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 rounded">Add Collaboration</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode support
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Data structure
+        let teamMembers = [];
+        let collaborationHistory = [];
+
+        // Strategic Business Development Team Data
+        // Role mapping: i5=Analyst, i6=Senior Analyst, i7=Advisor, i8=Senior Advisor, i9=Consultant, i10=Senior Consultant
+        const sampleMembers = [
+            { id: 1, name: "Alejandro Assam", level: "i9", startDate: "2022-06-15" },
+            { id: 2, name: "Amanda Feldman", level: "i8", startDate: "2021-09-01" },
+            { id: 3, name: "Arjun Lal", level: "i5", startDate: "2023-08-01" },
+            { id: 4, name: "Audrey Ly", level: "i5", startDate: "2021-10-15" },
+            { id: 5, name: "Cara McCarthy", level: "i5", startDate: "2023-07-15" },
+            { id: 6, name: "Clark Price", level: "i8", startDate: "2020-03-01" },
+            { id: 7, name: "Dominik Freund", level: "i10", startDate: "2021-01-15" },
+            { id: 8, name: "Felipe Gaviria", level: "i10", startDate: "2019-11-01" },
+            { id: 9, name: "Hardik Mehta", level: "i8", startDate: "2021-08-15" },
+            { id: 10, name: "Iryna Bocharova", level: "i8", startDate: "2022-02-01" },
+            { id: 11, name: "Jack McElwee", level: "i7", startDate: "2022-11-01" },
+            { id: 12, name: "James Gibbard", level: "i8", startDate: "2023-06-01" },
+            { id: 13, name: "Jonathan Ruud", level: "i9", startDate: "2022-07-01" },
+            { id: 14, name: "Jon Eary", level: "i8", startDate: "2021-11-01" },
+            { id: 15, name: "Juan Pena", level: "i8", startDate: "2022-04-15" },
+            { id: 16, name: "June Yuan", level: "i6", startDate: "2023-08-01" },
+            { id: 17, name: "Katie C Wilson", level: "i9", startDate: "2022-06-01" },
+            { id: 18, name: "Lasya Gulibhi", level: "i8", startDate: "2021-11-15" },
+            { id: 19, name: "Lisa Chen", level: "i9", startDate: "2020-01-15" },
+            { id: 20, name: "Maisie Li", level: "i5", startDate: "2021-10-01" },
+            { id: 21, name: "Malcolm Chan", level: "i9", startDate: "2022-12-01" },
+            { id: 22, name: "Rahul Wadhwani", level: "i5", startDate: "2021-12-01" },
+            { id: 23, name: "Shlok Shah", level: "i5", startDate: "2023-05-15" },
+            { id: 24, name: "Susan Miller", level: "i5", startDate: "2021-11-01" },
+            { id: 25, name: "Thaddeus Kvietok", level: "i5", startDate: "2023-08-15" }
+        ];
+
+        // FY26Q1 Collaboration Data (Oct-Dec 2024)
+        const sampleCollaborations = [
+            // FY27 Priorities project collaborations
+            { member1: "Alejandro Assam", member2: "Hardik Mehta", date: "2024-10-15" },
+            { member1: "Alejandro Assam", member2: "Susan Miller", date: "2024-10-15" },
+            { member1: "Hardik Mehta", member2: "Susan Miller", date: "2024-10-15" },
+            { member1: "Juan Pena", member2: "Alejandro Assam", date: "2024-10-15" },
+            { member1: "Juan Pena", member2: "Hardik Mehta", date: "2024-10-15" },
+            { member1: "Juan Pena", member2: "Susan Miller", date: "2024-10-15" },
+            
+            // AI Agents project collaborations
+            { member1: "Amanda Feldman", member2: "Jonathan Ruud", date: "2024-11-01" },
+            { member1: "Amanda Feldman", member2: "Thaddeus Kvietok", date: "2024-11-01" },
+            { member1: "Jonathan Ruud", member2: "Thaddeus Kvietok", date: "2024-11-01" },
+            
+            // Beacon Health Check project collaborations
+            { member1: "Amanda Feldman", member2: "Katie C Wilson", date: "2024-11-10" },
+            { member1: "Amanda Feldman", member2: "Audrey Ly", date: "2024-11-10" },
+            { member1: "Katie C Wilson", member2: "Audrey Ly", date: "2024-11-10" },
+            
+            // Consumer / PC Cost Challenge project collaborations
+            { member1: "Arjun Lal", member2: "Malcolm Chan", date: "2024-10-20" },
+            { member1: "Arjun Lal", member2: "Lasya Gulibhi", date: "2024-10-20" },
+            { member1: "Arjun Lal", member2: "Audrey Ly", date: "2024-10-20" },
+            { member1: "Arjun Lal", member2: "Hardik Mehta", date: "2024-10-20" },
+            { member1: "Malcolm Chan", member2: "Lasya Gulibhi", date: "2024-10-20" },
+            { member1: "Malcolm Chan", member2: "Audrey Ly", date: "2024-10-20" },
+            { member1: "Malcolm Chan", member2: "Hardik Mehta", date: "2024-10-20" },
+            { member1: "Lasya Gulibhi", member2: "Audrey Ly", date: "2024-10-20" },
+            { member1: "Felipe Gaviria", member2: "Hardik Mehta", date: "2024-10-20" },
+            
+            // Pricing project collaborations
+            { member1: "Clark Price", member2: "Felipe Gaviria", date: "2024-11-05" },
+            { member1: "Felipe Gaviria", member2: "Maisie Li", date: "2024-11-05" },
+            
+            // Silicon GTM project collaborations
+            { member1: "Clark Price", member2: "Susan Miller", date: "2024-11-15" },
+            
+            // Commercial project collaborations
+            { member1: "Dominik Freund", member2: "Jack McElwee", date: "2024-10-25" },
+            { member1: "Dominik Freund", member2: "June Yuan", date: "2024-10-25" },
+            { member1: "Jack McElwee", member2: "June Yuan", date: "2024-10-25" },
+            { member1: "Jack McElwee", member2: "Maisie Li", date: "2024-10-25" },
+            
+            // Alienware 4Ps project collaborations
+            { member1: "Dominik Freund", member2: "Jon Eary", date: "2024-12-01" },
+            { member1: "Dominik Freund", member2: "Rahul Wadhwani", date: "2024-12-01" },
+            { member1: "Jon Eary", member2: "Rahul Wadhwani", date: "2024-12-01" },
+            
+            // CP Transformation project collaborations
+            { member1: "Iryna Bocharova", member2: "Katie C Wilson", date: "2024-11-20" },
+            { member1: "Iryna Bocharova", member2: "Lisa Chen", date: "2024-11-20" },
+            { member1: "Iryna Bocharova", member2: "Jon Eary", date: "2024-11-20" },
+            { member1: "Iryna Bocharova", member2: "Rahul Wadhwani", date: "2024-11-20" },
+            { member1: "Iryna Bocharova", member2: "Thaddeus Kvietok", date: "2024-11-20" },
+            { member1: "Katie C Wilson", member2: "Lisa Chen", date: "2024-11-20" },
+            { member1: "Katie C Wilson", member2: "Jon Eary", date: "2024-11-20" },
+            { member1: "Katie C Wilson", member2: "Rahul Wadhwani", date: "2024-11-20" },
+            { member1: "Lisa Chen", member2: "Jon Eary", date: "2024-11-20" },
+            { member1: "Lisa Chen", member2: "Rahul Wadhwani", date: "2024-11-20" },
+            { member1: "Lisa Chen", member2: "Thaddeus Kvietok", date: "2024-11-20" },
+            
+            // CVO Implementation project collaborations
+            { member1: "Jonathan Ruud", member2: "Lasya Gulibhi", date: "2024-12-05" },
+            { member1: "Jonathan Ruud", member2: "June Yuan", date: "2024-12-05" },
+            { member1: "Lasya Gulibhi", member2: "June Yuan", date: "2024-12-05" }
+        ];
+
+        // Initialize with sample data
+        teamMembers = sampleMembers.map(member => ({...member}));
+        collaborationHistory = sampleCollaborations.map(collab => ({...collab}));
+
+        // Utility functions
+        function calculateTenure(startDate) {
+            const start = new Date(startDate);
+            const now = new Date();
+            const diffTime = Math.abs(now - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 30) return `${diffDays} days`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`;
+            return `${Math.floor(diffDays / 365)} years`;
+        }
+
+        function isRecentCollaboration(member1, member2) {
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            return collaborationHistory.some(collab => {
+                const collabDate = new Date(collab.date);
+                return collabDate >= sixMonthsAgo && 
+                       ((collab.member1 === member1 && collab.member2 === member2) ||
+                        (collab.member1 === member2 && collab.member2 === member1));
+            });
+        }
+
+        function isNewMember(member) {
+            const startDate = new Date(member.startDate);
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            return startDate >= sixMonthsAgo;
+        }
+
+        // Render functions
+        function renderMembers() {
+            const tbody = document.getElementById('membersTable');
+            tbody.innerHTML = teamMembers.map(member => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${member.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="level-badge level-${member.level}">${member.level.toUpperCase()}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="removeMember(${member.id})" class="text-red-600 hover:text-red-900 dark:hover:text-red-400">Remove</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            renderStats();
+            updateCollaborationSelects();
+        }
+
+        function renderCollaborations() {
+            const container = document.getElementById('collaborationList');
+            container.innerHTML = collaborationHistory.map(collab => {
+                const isRecent = new Date(collab.date) >= new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
+                return `
+                    <div class="p-2 rounded ${isRecent ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-700'}">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">${collab.member1} ↔ ${collab.member2}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${collab.date} ${isRecent ? '(Recent)' : ''}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStats() {
+            const stats = document.getElementById('teamStats');
+            const levelCounts = teamMembers.reduce((acc, member) => {
+                acc[member.level] = (acc[member.level] || 0) + 1;
+                return acc;
+            }, {});
+
+            const newMembers = teamMembers.filter(isNewMember).length;
+            const leads = teamMembers.filter(m => m.level === 'i9' || m.level === 'i10').length;
+
+            stats.innerHTML = `
+                <div class="text-sm">
+                    <div class="flex justify-between"><span>Total Members:</span><span class="font-medium">${teamMembers.length}</span></div>
+                    <div class="flex justify-between"><span>Project Leads:</span><span class="font-medium">${leads}</span></div>
+                    <div class="flex justify-between"><span>New Members (< 6mo):</span><span class="font-medium">${newMembers}</span></div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level Distribution:</div>
+                    ${['i5', 'i6', 'i7', 'i8', 'i9', 'i10'].map(level => 
+                        `<div class="flex justify-between text-sm">
+                            <span class="level-badge level-${level}">${level.toUpperCase()}</span>
+                            <span>${levelCounts[level] || 0}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        // Modal functions
+        function showAddMemberModal() {
+            document.getElementById('addMemberModal').classList.remove('hidden');
+        }
+
+        function closeAddMemberModal() {
+            document.getElementById('addMemberModal').classList.add('hidden');
+            document.getElementById('memberName').value = '';
+            document.getElementById('memberLevel').value = 'i5';
+        }
+
+        function addMember() {
+            const name = document.getElementById('memberName').value.trim();
+            const level = document.getElementById('memberLevel').value;
+
+            if (!name) {
+                showAlert('Please enter a name');
+                return;
+            }
+
+            const newMember = {
+                id: Math.max(...teamMembers.map(m => m.id), 0) + 1,
+                name,
+                level,
+                startDate: new Date().toISOString().split('T')[0] // Default to today
+            };
+
+            teamMembers.push(newMember);
+            renderMembers();
+            renderCollaborations();
+            closeAddMemberModal();
+        }
+
+        function removeMember(id) {
+            showConfirmDialog('Are you sure you want to remove this team member?', () => {
+                teamMembers = teamMembers.filter(m => m.id !== id);
+                renderMembers();
+                renderCollaborations();
+            });
+        }
+
+        function showCollaborationModal() {
+            if (teamMembers.length < 2) {
+                showAlert('Need at least 2 team members to add collaboration history');
+                return;
+            }
+            document.getElementById('collaborationModal').classList.remove('hidden');
+            document.getElementById('collabDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function closeCollaborationModal() {
+            document.getElementById('collaborationModal').classList.add('hidden');
+        }
+
+        function updateCollaborationSelects() {
+            const selects = ['collab1', 'collab2'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = teamMembers.map(member => 
+                    `<option value="${member.name}">${member.name} (${member.level.toUpperCase()})</option>`
+                ).join('');
+            });
+        }
+
+        function addCollaboration() {
+            const member1 = document.getElementById('collab1').value;
+            const member2 = document.getElementById('collab2').value;
+            const date = document.getElementById('collabDate').value;
+
+            if (member1 === member2) {
+                showAlert('Please select different team members');
+                return;
+            }
+
+            const newCollab = { member1, member2, date };
+            collaborationHistory.push(newCollab);
+            renderCollaborations();
+            closeCollaborationModal();
+        }
+
+        // Team generation algorithm
+        function generateTeamSuggestions() {
+            const requirements = {
+                projectName: document.getElementById('projectName').value || 'Untitled Project',
+                teamSize: parseInt(document.getElementById('teamSize').value),
+                requireLead: document.getElementById('requireLead').value === 'true',
+                i5: parseInt(document.getElementById('i5Count').value),
+                i6: parseInt(document.getElementById('i6Count').value),
+                i7: parseInt(document.getElementById('i7Count').value),
+                i8: parseInt(document.getElementById('i8Count').value),
+                i9: parseInt(document.getElementById('i9Count').value),
+                i10: parseInt(document.getElementById('i10Count').value)
+            };
+
+            const totalRequired = requirements.i5 + requirements.i6 + requirements.i7 + 
+                                requirements.i8 + requirements.i9 + requirements.i10;
+            
+            if (totalRequired > requirements.teamSize) {
+                showAlert('Total level requirements exceed team size');
+                return;
+            }
+
+            const suggestions = generateOptimalTeams(requirements, 3);
+            displaySuggestions(suggestions, requirements);
+        }
+
+        function generateOptimalTeams(requirements, numSuggestions) {
+            const suggestions = [];
+            
+            for (let i = 0; i < numSuggestions; i++) {
+                const team = createTeam(requirements);
+                if (team) {
+                    suggestions.push({
+                        team,
+                        score: scoreTeam(team),
+                        conflicts: findConflicts(team)
+                    });
+                }
+            }
+            
+            return suggestions.sort((a, b) => b.score - a.score);
+        }
+
+        function createTeam(requirements) {
+            const team = [];
+            const availableMembers = [...teamMembers];
+            
+            // First, satisfy level requirements
+            const levelRequirements = ['i5', 'i6', 'i7', 'i8', 'i9', 'i10'];
+            
+            for (const level of levelRequirements) {
+                const needed = requirements[level];
+                const candidates = availableMembers.filter(m => m.level === level);
+                
+                for (let i = 0; i < needed && candidates.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * candidates.length);
+                    const selected = candidates.splice(randomIndex, 1)[0];
+                    team.push(selected);
+                    availableMembers.splice(availableMembers.indexOf(selected), 1);
+                }
+            }
+            
+            // Add lead if required and not already present
+            if (requirements.requireLead && !team.some(m => m.level === 'i9' || m.level === 'i10')) {
+                const leads = availableMembers.filter(m => m.level === 'i9' || m.level === 'i10');
+                if (leads.length > 0) {
+                    const selected = leads[Math.floor(Math.random() * leads.length)];
+                    team.push(selected);
+                    availableMembers.splice(availableMembers.indexOf(selected), 1);
+                }
+            }
+            
+            // Fill remaining spots
+            while (team.length < requirements.teamSize && availableMembers.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableMembers.length);
+                const selected = availableMembers.splice(randomIndex, 1)[0];
+                team.push(selected);
+            }
+            
+            return team.length === requirements.teamSize ? team : null;
+        }
+
+        function scoreTeam(team) {
+            let score = 100;
+            
+            // Penalty for recent collaborations
+            for (let i = 0; i < team.length; i++) {
+                for (let j = i + 1; j < team.length; j++) {
+                    if (isRecentCollaboration(team[i].name, team[j].name)) {
+                        // Higher penalty for new members
+                        const penalty = (isNewMember(team[i]) || isNewMember(team[j])) ? 20 : 10;
+                        score -= penalty;
+                    }
+                }
+            }
+            
+            // Bonus for experience mix
+            const levels = team.map(m => m.level);
+            const uniqueLevels = new Set(levels).size;
+            score += uniqueLevels * 5;
+            
+            // Bonus for having leads
+            const hasLead = team.some(m => m.level === 'i9' || m.level === 'i10');
+            if (hasLead) score += 10;
+            
+            return score;
+        }
+
+        function findConflicts(team) {
+            const conflicts = [];
+            
+            for (let i = 0; i < team.length; i++) {
+                for (let j = i + 1; j < team.length; j++) {
+                    if (isRecentCollaboration(team[i].name, team[j].name)) {
+                        conflicts.push({
+                            member1: team[i].name,
+                            member2: team[j].name,
+                            isNewMember: isNewMember(team[i]) || isNewMember(team[j])
+                        });
+                    }
+                }
+            }
+            
+            return conflicts;
+        }
+
+        function displaySuggestions(suggestions, requirements) {
+            const panel = document.getElementById('suggestionsPanel');
+            const container = document.getElementById('suggestionsContainer');
+            
+            if (suggestions.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 dark:text-gray-400">No suitable teams found. Try adjusting requirements.</div>';
+                panel.classList.remove('hidden');
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h3 class="font-medium text-blue-900 dark:text-blue-200">${requirements.projectName}</h3>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">Team Size: ${requirements.teamSize} | Requires Lead: ${requirements.requireLead ? 'Yes' : 'No'}</p>
+                </div>
+                ${suggestions.map((suggestion, index) => `
+                    <div class="mb-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-medium text-gray-900 dark:text-white">Team Option ${index + 1}</h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-medium px-2 py-1 rounded ${
+                                    suggestion.score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                    suggestion.score >= 60 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                }">Score: ${suggestion.score}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Team Members:</h5>
+                                <div class="space-y-1">
+                                    ${suggestion.team.map(member => `
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-900 dark:text-white">${member.name}</span>
+                                            <span class="level-badge level-${member.level}">${member.level.toUpperCase()}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                ${suggestion.conflicts.length > 0 ? `
+                                    <h5 class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">Potential Conflicts:</h5>
+                                    <div class="space-y-1">
+                                        ${suggestion.conflicts.map(conflict => `
+                                            <div class="text-xs text-red-600 dark:text-red-400">
+                                                ${conflict.member1} ↔ ${conflict.member2}
+                                                ${conflict.isNewMember ? ' (New member involved)' : ''}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : `
+                                    <div class="text-sm text-green-600 dark:text-green-400">✓ No recent collaboration conflicts</div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            panel.classList.remove('hidden');
+        }
+
+        // Custom dialog functions (replacing alert/confirm)
+        function showAlert(message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <div class="flex justify-end">
+                        <button class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded" onclick="this.closest('.fixed').remove()">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showConfirmDialog(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded" onclick="this.closest('.fixed').remove()">Cancel</button>
+                        <button class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded" onclick="this.closest('.fixed').remove(); (${onConfirm})()">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMembers();
+            renderCollaborations();
+        });
+    </script>
+</body>
+</html>
