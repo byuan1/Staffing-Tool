@@ -3,719 +3,640 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Staffing Tool</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+    <title>Project Resonance - Strategic Staffing Tool</title>
     <style>
-        .level-badge {
-            @apply px-2 py-1 rounded-full text-xs font-medium;
+        /* --- Global Styles & Dell Branding --- */
+        :root {
+            --dell-blue: #0076CE;
+            --dell-light-blue: #0085C3;
+            --light-gray-bg: #EEEEEE;
+            --white-bg: #FFFFFF;
+            --dark-text: #333333;
+            --medium-text: #555555;
+            --border-color: #DDDDDD;
+            --success-green: #28A745;
+            --warning-orange: #D35400;
+            --warning-red: #DC3545;
+            --tag-i10: #1B4F72;
+            --tag-i10-bg: #D6EAF8;
+            --tag-i8: #512E5F;
+            --tag-i8-bg: #E8DAEF;
+            --tag-i5: #145A32;
+            --tag-i5-bg: #D4EFDF;
         }
-        .level-i5 { @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200; }
-        .level-i6 { @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200; }
-        .level-i7 { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200; }
-        .level-i8 { @apply bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200; }
-        .level-i9 { @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200; }
-        .level-i10 { @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200; }
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-gray-bg);
+            margin: 0;
+            padding: 20px;
+            color: var(--dark-text);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px 40px;
+        }
+
+        /* --- Header --- */
+        .header h1 {
+            color: var(--dell-blue);
+            font-weight: 300;
+            border-bottom: 2px solid var(--light-gray-bg);
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            color: var(--medium-text);
+            font-size: 1rem;
+            margin-top: -10px;
+        }
+
+        /* --- Control Panel --- */
+        .control-panel {
+            background-color: #F8F9FA;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 25px;
+        }
+
+        .control-panel h2, .results-area h2, details summary {
+            color: var(--dark-text);
+            font-weight: 500;
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-gap: 20px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--medium-text);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"], .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #CCCCCC;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .roles-group {
+            margin-top: 20px;
+        }
+
+        .roles-group h3 {
+            font-weight: 500;
+            color: var(--medium-text);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .roles-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .roles-inputs span {
+            font-size: 0.9rem;
+        }
+
+        .roles-inputs input[type="number"] {
+            width: 45px;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        .action-button {
+            background-color: var(--dell-blue);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 25px;
+        }
+
+        .action-button:hover {
+            background-color: var(--dell-light-blue);
+        }
+
+        /* --- Results Area --- */
+        .results-area {
+            margin-top: 30px;
+        }
+        .results-area > p {
+             color: var(--medium-text);
+        }
+
+        .recommendation-card {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.2s;
+        }
+
+        .recommendation-card.optimal {
+            border: 2px solid var(--dell-light-blue);
+        }
+        
+        .recommendation-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            color: var(--dell-blue);
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .card-header .score {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .score.low-conflict {
+            background-color: #E6F2FD;
+            color: var(--dell-blue);
+        }
+        
+        .score.high-conflict {
+             background-color: #FDF2E6;
+             color: var(--warning-orange);
+        }
+
+        .card-hr {
+            border: none;
+            border-top: 1px solid var(--light-gray-bg);
+            margin: 15px 0;
+        }
+        
+        .team-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .team-table th {
+            text-align: left;
+            padding: 8px;
+            background-color: #F8F9FA;
+            font-weight: 500;
+        }
+
+        .team-table td {
+             padding: 8px;
+             border-bottom: 1px solid var(--light-gray-bg);
+        }
+        
+        .i-level-tag {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+        }
+        
+        /* Specific tag colors */
+        .i10 { background-color: var(--tag-i10); }
+        .i9 { background-color: var(--tag-i10); } /* Same as i10 */
+        .i8 { background-color: var(--tag-i8); }
+        .i7 { background-color: #bcaaa4; }
+        .i6 { background-color: #81c784; }
+        .i5 { background-color: var(--tag-i5); }
+
+        .conflict-section {
+            margin-top: 15px;
+            padding: 12px;
+            border-left: 4px solid;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .conflict-section.no-conflict {
+            background-color: #F3FAF3;
+            border-color: var(--success-green);
+        }
+        
+        .conflict-section.has-conflict {
+            background-color: #FEF5F5;
+            border-color: var(--warning-red);
+        }
+
+        .conflict-section h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        .conflict-section.no-conflict h4 { color: #1E7E34; }
+        .conflict-section.has-conflict h4 { color: #A71D2A; }
+
+        .conflict-section p, .conflict-section ul {
+            margin: 5px 0 0;
+            color: var(--dark-text);
+            font-size: 0.9rem;
+        }
+
+        .conflict-section ul {
+            padding-left: 20px;
+        }
+        
+        /* --- Reference Data --- */
+        details {
+            margin-top: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        details summary {
+            cursor: pointer;
+            font-weight: 500;
+        }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Smart Staffing Tool</h1>
-            <p class="text-gray-600 dark:text-gray-400">Optimize team composition based on experience levels and collaboration history</p>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>Project Resonance</h1>
+            <p>Strategic Staffing Synthesizer</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Team Members Panel -->
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Team Members</h2>
-                        <button onclick="showAddMemberModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                            Add Member
-                        </button>
+        <form id="staffingForm">
+            <div class="control-panel">
+                <h2>1. Define Project Requirements</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="projName">Project Name</label>
+                        <input type="text" id="projName" value="Project Chimera" required>
                     </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Level</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="membersTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            </tbody>
-                        </table>
+                    <div class="form-group">
+                        <label for="leadSelect">Pre-assign Lead (Optional)</label>
+                        <select id="leadSelect">
+                            <option value="">None (Recommend for me)</option>
+                        </select>
                     </div>
                 </div>
-
-                <!-- Project Requirements -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Project Requirements</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project Name</label>
-                            <input type="text" id="projectName" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base" placeholder="Enter project name">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Team Size</label>
-                            <input type="number" id="teamSize" min="1" max="20" value="5" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Must Have Lead</label>
-                            <select id="requireLead" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                                <option value="true">Yes (i9/i10)</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
+                <div class="roles-group">
+                    <h3>Required Roles (i-Levels)</h3>
+                    <div class="roles-inputs">
+                        <span>i10: <input type="number" id="req-i10" value="0" min="0"></span>
+                        <span>i9: <input type="number" id="req-i9" value="1" min="0"></span>
+                        <span>i8: <input type="number" id="req-i8" value="2" min="0"></span>
+                        <span>i7: <input type="number" id="req-i7" value="0" min="0"></span>
+                        <span>i6: <input type="number" id="req-i6" value="0" min="0"></span>
+                        <span>i5: <input type="number" id="req-i5" value="2" min="0"></span>
                     </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Analysts (i5)</label>
-                            <input type="number" id="i5Count" min="0" value="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sr. Analysts (i6)</label>
-                            <input type="number" id="i6Count" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Advisors (i7)</label>
-                            <input type="number" id="i7Count" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sr. Advisors (i8)</label>
-                            <input type="number" id="i8Count" min="0" value="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Consultants (i9)</label>
-                            <input type="number" id="i9Count" min="0" value="1" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sr. Consultants (i10)</label>
-                            <input type="number" id="i10Count" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        </div>
-                    </div>
-
-                    <button onclick="generateTeamSuggestions()" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium">
-                        Generate Team Suggestions
-                    </button>
                 </div>
+                <button type="submit" class="action-button">Generate Team Recommendations</button>
+            </div>
+        </form>
 
-                <!-- Team Suggestions -->
-                <div id="suggestionsPanel" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hidden">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Team Suggestions</h2>
-                    <div id="suggestionsContainer"></div>
-                </div>
+        <div class="results-area" id="resultsArea">
             </div>
 
-            <!-- Sidebar -->
-            <div class="space-y-6">
-                <!-- Collaboration History -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Collaboration History</h2>
-                        <button onclick="showCollaborationModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md text-sm font-medium">
-                            Add
-                        </button>
-                    </div>
-                    
-                    <div id="collaborationList" class="space-y-2 max-h-64 overflow-y-auto">
-                    </div>
-                </div>
+        <details>
+            <summary>View Talent Pool & Reference Data</summary>
+            <div id="referenceData" style="margin-top: 15px;">
+                <h4>Available Personnel</h4>
+                <p style="font-size: 0.8rem; color: #555;">Excludes Directors and VP.</p>
+                <table class="team-table">
+                     <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Title</th>
+                            <th>i-Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="talentPoolTable">
+                        </tbody>
+                </table>
+            </div>
+        </details>
 
-                <!-- Statistics -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Team Statistics</h2>
-                    <div id="teamStats" class="space-y-2">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Member Modal -->
-    <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Team Member</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
-                    <input type="text" id="memberName" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base" placeholder="Enter member name">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level</label>
-                    <select id="memberLevel" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                        <option value="i5">i5 - Analyst</option>
-                        <option value="i6">i6 - Senior Analyst</option>
-                        <option value="i7">i7 - Advisor</option>
-                        <option value="i8">i8 - Senior Advisor</option>
-                        <option value="i9">i9 - Consultant (Lead)</option>
-                        <option value="i10">i10 - Senior Consultant (Lead)</option>
-                    </select>
-                </div>
-                
-
-            </div>
-            
-            <div class="flex justify-end space-x-3 mt-6">
-                <button onclick="closeAddMemberModal()" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Cancel</button>
-                <button onclick="addMember()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded">Add Member</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Collaboration Modal -->
-    <div id="collaborationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Collaboration History</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member 1</label>
-                    <select id="collab1" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member 2</label>
-                    <select id="collab2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Collaboration Date</label>
-                    <input type="date" id="collabDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
-                </div>
-            </div>
-            
-            <div class="flex justify-end space-x-3 mt-6">
-                <button onclick="closeCollaborationModal()" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Cancel</button>
-                <button onclick="addCollaboration()" class="px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 rounded">Add Collaboration</button>
-            </div>
-        </div>
     </div>
 
     <script>
-        // Dark mode support
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
-
-        // Data structure
-        let teamMembers = [];
-        let collaborationHistory = [];
-
-        // Strategic Business Development Team Data
-        // Role mapping: i5=Analyst, i6=Senior Analyst, i7=Advisor, i8=Senior Advisor, i9=Consultant, i10=Senior Consultant
-        const sampleMembers = [
-            { id: 1, name: "Alejandro Assam", level: "i9", startDate: "2022-06-15" },
-            { id: 2, name: "Amanda Feldman", level: "i8", startDate: "2021-09-01" },
-            { id: 3, name: "Arjun Lal", level: "i5", startDate: "2023-08-01" },
-            { id: 4, name: "Audrey Ly", level: "i5", startDate: "2021-10-15" },
-            { id: 5, name: "Cara McCarthy", level: "i5", startDate: "2023-07-15" },
-            { id: 6, name: "Clark Price", level: "i8", startDate: "2020-03-01" },
-            { id: 7, name: "Dominik Freund", level: "i10", startDate: "2021-01-15" },
-            { id: 8, name: "Felipe Gaviria", level: "i10", startDate: "2019-11-01" },
-            { id: 9, name: "Hardik Mehta", level: "i8", startDate: "2021-08-15" },
-            { id: 10, name: "Iryna Bocharova", level: "i8", startDate: "2022-02-01" },
-            { id: 11, name: "Jack McElwee", level: "i7", startDate: "2022-11-01" },
-            { id: 12, name: "James Gibbard", level: "i8", startDate: "2023-06-01" },
-            { id: 13, name: "Jonathan Ruud", level: "i9", startDate: "2022-07-01" },
-            { id: 14, name: "Jon Eary", level: "i8", startDate: "2021-11-01" },
-            { id: 15, name: "Juan Pena", level: "i8", startDate: "2022-04-15" },
-            { id: 16, name: "June Yuan", level: "i6", startDate: "2023-08-01" },
-            { id: 17, name: "Katie C Wilson", level: "i9", startDate: "2022-06-01" },
-            { id: 18, name: "Lasya Gulibhi", level: "i8", startDate: "2021-11-15" },
-            { id: 19, name: "Lisa Chen", level: "i9", startDate: "2020-01-15" },
-            { id: 20, name: "Maisie Li", level: "i5", startDate: "2021-10-01" },
-            { id: 21, name: "Malcolm Chan", level: "i9", startDate: "2022-12-01" },
-            { id: 22, name: "Rahul Wadhwani", level: "i5", startDate: "2021-12-01" },
-            { id: 23, name: "Shlok Shah", level: "i5", startDate: "2023-05-15" },
-            { id: 24, name: "Susan Miller", level: "i5", startDate: "2021-11-01" },
-            { id: 25, name: "Thaddeus Kvietok", level: "i5", startDate: "2023-08-15" }
+        // --- DATA STORE ---
+        const employees = [
+            { name: "Dominik Freund", title: "Senior Consultant", iLevel: 10 },
+            { name: "Felipe Gaviria", title: "Senior Consultant", iLevel: 10 },
+            { name: "Alejandro Assam", title: "Consultant", iLevel: 9 },
+            { name: "Jonathan Ruud", title: "Consultant", iLevel: 9 },
+            { name: "Katie C Wilson", title: "Consultant", iLevel: 9 },
+            { name: "Lisa Chen", title: "Consultant", iLevel: 9 },
+            { name: "Malcolm Chan", title: "Consultant", iLevel: 9 },
+            { name: "Amanda Feldman", title: "Senior Advisor", iLevel: 8 },
+            { name: "Clark Price", title: "Senior Advisor", iLevel: 8 },
+            { name: "Hardik Mehta", title: "Senior Advisor", iLevel: 8 },
+            { name: "Iryna Bocharova", title: "Senior Advisor", iLevel: 8 },
+            { name: "James Gibbard", title: "Senior Advisor", iLevel: 8 },
+            { name: "Jon Eary", title: "Senior Advisor", iLevel: 8 },
+            { name: "Juan Pena", title: "Senior Advisor", iLevel: 8 },
+            { name: "Lasya Gulibhi", title: "Senior Advisor", iLevel: 8 },
+            { name: "Jack McElwee", title: "Advisor", iLevel: 7 },
+            { name: "June Yuan", title: "Senior Analyst", iLevel: 6 },
+            { name: "Arjun Lal", title: "Analyst", iLevel: 5 },
+            { name: "Audrey Ly", title: "Analyst", iLevel: 5 },
+            { name: "Cara McCarthy", title: "Analyst", iLevel: 5 },
+            { name: "Maisie Li", title: "Analyst", iLevel: 5 },
+            { name: "Rahul Wadhwani", title: "Analyst", iLevel: 5 },
+            { name: "Shlok Shah", title: "Analyst", iLevel: 5 },
+            { name: "Susan Miller", title: "Analyst", iLevel: 5 },
+            { name: "Thaddeus Kvietok", title: "Analyst", iLevel: 5 }
         ];
 
-        // FY26Q1 Collaboration Data (Oct-Dec 2024)
-        const sampleCollaborations = [
-            // FY27 Priorities project collaborations
-            { member1: "Alejandro Assam", member2: "Hardik Mehta", date: "2024-10-15" },
-            { member1: "Alejandro Assam", member2: "Susan Miller", date: "2024-10-15" },
-            { member1: "Hardik Mehta", member2: "Susan Miller", date: "2024-10-15" },
-            { member1: "Juan Pena", member2: "Alejandro Assam", date: "2024-10-15" },
-            { member1: "Juan Pena", member2: "Hardik Mehta", date: "2024-10-15" },
-            { member1: "Juan Pena", member2: "Susan Miller", date: "2024-10-15" },
-            
-            // AI Agents project collaborations
-            { member1: "Amanda Feldman", member2: "Jonathan Ruud", date: "2024-11-01" },
-            { member1: "Amanda Feldman", member2: "Thaddeus Kvietok", date: "2024-11-01" },
-            { member1: "Jonathan Ruud", member2: "Thaddeus Kvietok", date: "2024-11-01" },
-            
-            // Beacon Health Check project collaborations
-            { member1: "Amanda Feldman", member2: "Katie C Wilson", date: "2024-11-10" },
-            { member1: "Amanda Feldman", member2: "Audrey Ly", date: "2024-11-10" },
-            { member1: "Katie C Wilson", member2: "Audrey Ly", date: "2024-11-10" },
-            
-            // Consumer / PC Cost Challenge project collaborations
-            { member1: "Arjun Lal", member2: "Malcolm Chan", date: "2024-10-20" },
-            { member1: "Arjun Lal", member2: "Lasya Gulibhi", date: "2024-10-20" },
-            { member1: "Arjun Lal", member2: "Audrey Ly", date: "2024-10-20" },
-            { member1: "Arjun Lal", member2: "Hardik Mehta", date: "2024-10-20" },
-            { member1: "Malcolm Chan", member2: "Lasya Gulibhi", date: "2024-10-20" },
-            { member1: "Malcolm Chan", member2: "Audrey Ly", date: "2024-10-20" },
-            { member1: "Malcolm Chan", member2: "Hardik Mehta", date: "2024-10-20" },
-            { member1: "Lasya Gulibhi", member2: "Audrey Ly", date: "2024-10-20" },
-            { member1: "Felipe Gaviria", member2: "Hardik Mehta", date: "2024-10-20" },
-            
-            // Pricing project collaborations
-            { member1: "Clark Price", member2: "Felipe Gaviria", date: "2024-11-05" },
-            { member1: "Felipe Gaviria", member2: "Maisie Li", date: "2024-11-05" },
-            
-            // Silicon GTM project collaborations
-            { member1: "Clark Price", member2: "Susan Miller", date: "2024-11-15" },
-            
-            // Commercial project collaborations
-            { member1: "Dominik Freund", member2: "Jack McElwee", date: "2024-10-25" },
-            { member1: "Dominik Freund", member2: "June Yuan", date: "2024-10-25" },
-            { member1: "Jack McElwee", member2: "June Yuan", date: "2024-10-25" },
-            { member1: "Jack McElwee", member2: "Maisie Li", date: "2024-10-25" },
-            
-            // Alienware 4Ps project collaborations
-            { member1: "Dominik Freund", member2: "Jon Eary", date: "2024-12-01" },
-            { member1: "Dominik Freund", member2: "Rahul Wadhwani", date: "2024-12-01" },
-            { member1: "Jon Eary", member2: "Rahul Wadhwani", date: "2024-12-01" },
-            
-            // CP Transformation project collaborations
-            { member1: "Iryna Bocharova", member2: "Katie C Wilson", date: "2024-11-20" },
-            { member1: "Iryna Bocharova", member2: "Lisa Chen", date: "2024-11-20" },
-            { member1: "Iryna Bocharova", member2: "Jon Eary", date: "2024-11-20" },
-            { member1: "Iryna Bocharova", member2: "Rahul Wadhwani", date: "2024-11-20" },
-            { member1: "Iryna Bocharova", member2: "Thaddeus Kvietok", date: "2024-11-20" },
-            { member1: "Katie C Wilson", member2: "Lisa Chen", date: "2024-11-20" },
-            { member1: "Katie C Wilson", member2: "Jon Eary", date: "2024-11-20" },
-            { member1: "Katie C Wilson", member2: "Rahul Wadhwani", date: "2024-11-20" },
-            { member1: "Lisa Chen", member2: "Jon Eary", date: "2024-11-20" },
-            { member1: "Lisa Chen", member2: "Rahul Wadhwani", date: "2024-11-20" },
-            { member1: "Lisa Chen", member2: "Thaddeus Kvietok", date: "2024-11-20" },
-            
-            // CVO Implementation project collaborations
-            { member1: "Jonathan Ruud", member2: "Lasya Gulibhi", date: "2024-12-05" },
-            { member1: "Jonathan Ruud", member2: "June Yuan", date: "2024-12-05" },
-            { member1: "Lasya Gulibhi", member2: "June Yuan", date: "2024-12-05" }
+        // Raw collaboration data from FY26Q1
+        const rawCollaborations = [
+            ["Alejandro", "Hardik", "FY27 Priorities"], ["Alejandro", "Susan", "FY27 Priorities"],
+            ["Amanda", "Jon Rudd", "AI Agents"], ["Amanda", "Thaddeus", "AI Agents"], ["Amanda", "Katie W", "Beacon Health Check"], ["Amanda", "Audrey", "Beacon Health Check"],
+            ["Arjun", "Malcolm", "Consumer / PC Cost Challenge"], ["Arjun", "Lasya", "Consumer"], ["Arjun", "Audrey", "Consumer"], ["Arjun", "Hardik", "PC Cost Challenge"],
+            ["Audrey", "Malcolm", "Consumer"], ["Audrey", "Lasya", "Consumer"], ["Audrey", "Arjun", "Consumer"], ["Audrey", "Katie W", "Beacon Health Check"], ["Audrey", "Amanda", "Beacon Health Check"],
+            ["Clark", "Felipe", "Pricing"], ["Clark", "Susan", "Silicon GTM"],
+            ["Dom", "Jack", "Commercial"], ["Dom", "June", "Commercial"], ["Dom", "Jon Eary", "Alienware 4Ps"], ["Dom", "Rahul", "Alienware 4Ps"],
+            ["Felipe", "Clark", "Pricing"], ["Felipe", "Hardik", "PC Cost Challenge"], ["Felipe", "Maisie", "Pricing"],
+            ["Hardik", "Alejandro", "FY27 Priorities"], ["Hardik", "Susan", "FY27 Priorities"], ["Hardik", "Malcolm", "PC Cost Challenge"], ["Hardik", "Felipe", "PC Cost Challenge"], ["Hardik", "Arjun", "PC Cost Challenge"],
+            ["Iryna", "Katie W", "CP Transformation"], ["Iryna", "Lisa", "CP Transformation / DB CP Growth"], ["Iryna", "Jon Eary", "CP Transformation"], ["Iryna", "Rahul", "CP Transformation"], ["Iryna", "Thaddeus", "DB CP Growth"],
+            ["Jack", "Dom", "Commercial"], ["Jack", "June", "Commercial"], ["Jack", "Maisie", "Commercial / Kevin Planning Session"],
+            ["Jon Eary", "Katie W", "CP Transformation"], ["Jon Eary", "Lisa", "CP Transformation"], ["Jon Eary", "Iryna", "CP Transformation"], ["Jon Eary", "Rahul", "CP Transformation"], ["Jon Eary", "Dom", "Alienware 4Ps"], ["Jon Eary", "Rahul", "Alienware 4Ps"],
+            ["Jon Rudd", "Amanda", "AI Agents"], ["Jon Rudd", "Thaddeus", "AI Agents"], ["Jon Rudd", "Lasya", "CVO Implementation"], ["Jon Rudd", "June", "CVO Implementation"],
+            ["Juan", "Alejandro", "FY27 Priorities"], ["Juan", "Hardik", "FY27 Priorities"], ["Juan", "Susan", "FY27 Priorities"],
+            ["June", "Dom", "Commercial"], ["June", "Jack", "Commercial"], ["June", "Jon Rudd", "CVO Implementation"], ["June", "Lasya", "CVO Implementation"],
+            ["Katie W", "Lisa", "CP Transformation"], ["Katie W", "Iryna", "CP Transformation"], ["Katie W", "Jon Eary", "CP Transformation"], ["Katie W", "Rahul", "CP Transformation"], ["Katie W", "Amanda", "Beacon Health Check"], ["Katie W", "Audrey", "Beacon Health Check"],
+            ["Lasya", "Malcolm", "Consumer"], ["Lasya", "Audrey", "Consumer"], ["Lasya", "Arjun", "Consumer"], ["Lasya", "Jon Rudd", "CVO Implementation"], ["Lasya", "June", "CVO Implementation"],
+            ["Lisa", "Katie W", "CP Transformation"], ["Lisa", "Iryna", "CP Transformation / DB CP Growth"], ["Lisa", "Jon Eary", "CP Transformation"], ["Lisa", "Rahul", "CP Transformation"], ["Lisa", "Thaddeus", "DB CP Growth"],
+            ["Maisie", "Jack", "Commercial / Kevin Planning Session"], ["Maisie", "Felipe", "Pricing"],
+            ["Malcolm", "Lasya", "Consumer"], ["Malcolm", "Audrey", "Consumer"], ["Malcolm", "Arjun", "Consumer / PC Cost Challenge"], ["Malcolm", "Hardik", "PC Cost Challenge"],
+            ["Rahul", "Katie W", "CP Transformation"], ["Rahul", "Lisa", "CP Transformation"], ["Rahul", "Iryna", "CP Transformation"], ["Rahul", "Jon Eary", "CP Transformation / Alienware 4Ps"], ["Rahul", "Dom", "Alienware 4Ps"],
+            ["Susan", "Alejandro", "FY27 Priorities"], ["Susan", "Hardik", "FY27 Priorities"], ["Susan", "Clark", "Silicon GTM"],
+            ["Thaddeus", "Jon Rudd", "AI Agents"], ["Thaddeus", "Amanda", "AI Agents"], ["Thaddeus", "Lisa", "DB CP Growth"], ["Thaddeus", "Iryna", "DB CP Growth"]
         ];
-
-        // Initialize with sample data
-        teamMembers = sampleMembers.map(member => ({...member}));
-        collaborationHistory = sampleCollaborations.map(collab => ({...collab}));
-
-        // Utility functions
-        function calculateTenure(startDate) {
-            const start = new Date(startDate);
-            const now = new Date();
-            const diffTime = Math.abs(now - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays < 30) return `${diffDays} days`;
-            if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`;
-            return `${Math.floor(diffDays / 365)} years`;
-        }
-
-        function isRecentCollaboration(member1, member2) {
-            const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-            
-            return collaborationHistory.some(collab => {
-                const collabDate = new Date(collab.date);
-                return collabDate >= sixMonthsAgo && 
-                       ((collab.member1 === member1 && collab.member2 === member2) ||
-                        (collab.member1 === member2 && collab.member2 === member1));
-            });
-        }
-
-        function isNewMember(member) {
-            const startDate = new Date(member.startDate);
-            const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-            return startDate >= sixMonthsAgo;
-        }
-
-        // Render functions
-        function renderMembers() {
-            const tbody = document.getElementById('membersTable');
-            tbody.innerHTML = teamMembers.map(member => `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${member.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="level-badge level-${member.level}">${member.level.toUpperCase()}</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="removeMember(${member.id})" class="text-red-600 hover:text-red-900 dark:hover:text-red-400">Remove</button>
-                    </td>
-                </tr>
-            `).join('');
-            
-            renderStats();
-            updateCollaborationSelects();
-        }
-
-        function renderCollaborations() {
-            const container = document.getElementById('collaborationList');
-            container.innerHTML = collaborationHistory.map(collab => {
-                const isRecent = new Date(collab.date) >= new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
-                return `
-                    <div class="p-2 rounded ${isRecent ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-700'}">
-                        <div class="text-sm font-medium text-gray-900 dark:text-white">${collab.member1} ↔ ${collab.member2}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">${collab.date} ${isRecent ? '(Recent)' : ''}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderStats() {
-            const stats = document.getElementById('teamStats');
-            const levelCounts = teamMembers.reduce((acc, member) => {
-                acc[member.level] = (acc[member.level] || 0) + 1;
-                return acc;
-            }, {});
-
-            const newMembers = teamMembers.filter(isNewMember).length;
-            const leads = teamMembers.filter(m => m.level === 'i9' || m.level === 'i10').length;
-
-            stats.innerHTML = `
-                <div class="text-sm">
-                    <div class="flex justify-between"><span>Total Members:</span><span class="font-medium">${teamMembers.length}</span></div>
-                    <div class="flex justify-between"><span>Project Leads:</span><span class="font-medium">${leads}</span></div>
-                    <div class="flex justify-between"><span>New Members (< 6mo):</span><span class="font-medium">${newMembers}</span></div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level Distribution:</div>
-                    ${['i5', 'i6', 'i7', 'i8', 'i9', 'i10'].map(level => 
-                        `<div class="flex justify-between text-sm">
-                            <span class="level-badge level-${level}">${level.toUpperCase()}</span>
-                            <span>${levelCounts[level] || 0}</span>
-                        </div>`
-                    ).join('')}
-                </div>
-            `;
-        }
-
-        // Modal functions
-        function showAddMemberModal() {
-            document.getElementById('addMemberModal').classList.remove('hidden');
-        }
-
-        function closeAddMemberModal() {
-            document.getElementById('addMemberModal').classList.add('hidden');
-            document.getElementById('memberName').value = '';
-            document.getElementById('memberLevel').value = 'i5';
-        }
-
-        function addMember() {
-            const name = document.getElementById('memberName').value.trim();
-            const level = document.getElementById('memberLevel').value;
-
-            if (!name) {
-                showAlert('Please enter a name');
-                return;
-            }
-
-            const newMember = {
-                id: Math.max(...teamMembers.map(m => m.id), 0) + 1,
-                name,
-                level,
-                startDate: new Date().toISOString().split('T')[0] // Default to today
-            };
-
-            teamMembers.push(newMember);
-            renderMembers();
-            renderCollaborations();
-            closeAddMemberModal();
-        }
-
-        function removeMember(id) {
-            showConfirmDialog('Are you sure you want to remove this team member?', () => {
-                teamMembers = teamMembers.filter(m => m.id !== id);
-                renderMembers();
-                renderCollaborations();
-            });
-        }
-
-        function showCollaborationModal() {
-            if (teamMembers.length < 2) {
-                showAlert('Need at least 2 team members to add collaboration history');
-                return;
-            }
-            document.getElementById('collaborationModal').classList.remove('hidden');
-            document.getElementById('collabDate').value = new Date().toISOString().split('T')[0];
-        }
-
-        function closeCollaborationModal() {
-            document.getElementById('collaborationModal').classList.add('hidden');
-        }
-
-        function updateCollaborationSelects() {
-            const selects = ['collab1', 'collab2'];
-            selects.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                select.innerHTML = teamMembers.map(member => 
-                    `<option value="${member.name}">${member.name} (${member.level.toUpperCase()})</option>`
-                ).join('');
-            });
-        }
-
-        function addCollaboration() {
-            const member1 = document.getElementById('collab1').value;
-            const member2 = document.getElementById('collab2').value;
-            const date = document.getElementById('collabDate').value;
-
-            if (member1 === member2) {
-                showAlert('Please select different team members');
-                return;
-            }
-
-            const newCollab = { member1, member2, date };
-            collaborationHistory.push(newCollab);
-            renderCollaborations();
-            closeCollaborationModal();
-        }
-
-        // Team generation algorithm
-        function generateTeamSuggestions() {
-            const requirements = {
-                projectName: document.getElementById('projectName').value || 'Untitled Project',
-                teamSize: parseInt(document.getElementById('teamSize').value),
-                requireLead: document.getElementById('requireLead').value === 'true',
-                i5: parseInt(document.getElementById('i5Count').value),
-                i6: parseInt(document.getElementById('i6Count').value),
-                i7: parseInt(document.getElementById('i7Count').value),
-                i8: parseInt(document.getElementById('i8Count').value),
-                i9: parseInt(document.getElementById('i9Count').value),
-                i10: parseInt(document.getElementById('i10Count').value)
-            };
-
-            const totalRequired = requirements.i5 + requirements.i6 + requirements.i7 + 
-                                requirements.i8 + requirements.i9 + requirements.i10;
-            
-            if (totalRequired > requirements.teamSize) {
-                showAlert('Total level requirements exceed team size');
-                return;
-            }
-
-            const suggestions = generateOptimalTeams(requirements, 3);
-            displaySuggestions(suggestions, requirements);
-        }
-
-        function generateOptimalTeams(requirements, numSuggestions) {
-            const suggestions = [];
-            
-            for (let i = 0; i < numSuggestions; i++) {
-                const team = createTeam(requirements);
-                if (team) {
-                    suggestions.push({
-                        team,
-                        score: scoreTeam(team),
-                        conflicts: findConflicts(team)
-                    });
-                }
-            }
-            
-            return suggestions.sort((a, b) => b.score - a.score);
-        }
-
-        function createTeam(requirements) {
-            const team = [];
-            const availableMembers = [...teamMembers];
-            
-            // First, satisfy level requirements
-            const levelRequirements = ['i5', 'i6', 'i7', 'i8', 'i9', 'i10'];
-            
-            for (const level of levelRequirements) {
-                const needed = requirements[level];
-                const candidates = availableMembers.filter(m => m.level === level);
-                
-                for (let i = 0; i < needed && candidates.length > 0; i++) {
-                    const randomIndex = Math.floor(Math.random() * candidates.length);
-                    const selected = candidates.splice(randomIndex, 1)[0];
-                    team.push(selected);
-                    availableMembers.splice(availableMembers.indexOf(selected), 1);
-                }
-            }
-            
-            // Add lead if required and not already present
-            if (requirements.requireLead && !team.some(m => m.level === 'i9' || m.level === 'i10')) {
-                const leads = availableMembers.filter(m => m.level === 'i9' || m.level === 'i10');
-                if (leads.length > 0) {
-                    const selected = leads[Math.floor(Math.random() * leads.length)];
-                    team.push(selected);
-                    availableMembers.splice(availableMembers.indexOf(selected), 1);
-                }
-            }
-            
-            // Fill remaining spots
-            while (team.length < requirements.teamSize && availableMembers.length > 0) {
-                const randomIndex = Math.floor(Math.random() * availableMembers.length);
-                const selected = availableMembers.splice(randomIndex, 1)[0];
-                team.push(selected);
-            }
-            
-            return team.length === requirements.teamSize ? team : null;
-        }
-
-        function scoreTeam(team) {
-            let score = 100;
-            
-            // Penalty for recent collaborations
-            for (let i = 0; i < team.length; i++) {
-                for (let j = i + 1; j < team.length; j++) {
-                    if (isRecentCollaboration(team[i].name, team[j].name)) {
-                        // Higher penalty for new members
-                        const penalty = (isNewMember(team[i]) || isNewMember(team[j])) ? 20 : 10;
-                        score -= penalty;
-                    }
-                }
-            }
-            
-            // Bonus for experience mix
-            const levels = team.map(m => m.level);
-            const uniqueLevels = new Set(levels).size;
-            score += uniqueLevels * 5;
-            
-            // Bonus for having leads
-            const hasLead = team.some(m => m.level === 'i9' || m.level === 'i10');
-            if (hasLead) score += 10;
-            
-            return score;
-        }
-
-        function findConflicts(team) {
-            const conflicts = [];
-            
-            for (let i = 0; i < team.length; i++) {
-                for (let j = i + 1; j < team.length; j++) {
-                    if (isRecentCollaboration(team[i].name, team[j].name)) {
-                        conflicts.push({
-                            member1: team[i].name,
-                            member2: team[j].name,
-                            isNewMember: isNewMember(team[i]) || isNewMember(team[j])
-                        });
-                    }
-                }
-            }
-            
-            return conflicts;
-        }
-
-        function displaySuggestions(suggestions, requirements) {
-            const panel = document.getElementById('suggestionsPanel');
-            const container = document.getElementById('suggestionsContainer');
-            
-            if (suggestions.length === 0) {
-                container.innerHTML = '<div class="text-gray-500 dark:text-gray-400">No suitable teams found. Try adjusting requirements.</div>';
-                panel.classList.remove('hidden');
-                return;
-            }
-            
-            container.innerHTML = `
-                <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h3 class="font-medium text-blue-900 dark:text-blue-200">${requirements.projectName}</h3>
-                    <p class="text-sm text-blue-700 dark:text-blue-300">Team Size: ${requirements.teamSize} | Requires Lead: ${requirements.requireLead ? 'Yes' : 'No'}</p>
-                </div>
-                ${suggestions.map((suggestion, index) => `
-                    <div class="mb-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-medium text-gray-900 dark:text-white">Team Option ${index + 1}</h4>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-medium px-2 py-1 rounded ${
-                                    suggestion.score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                    suggestion.score >= 60 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }">Score: ${suggestion.score}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Team Members:</h5>
-                                <div class="space-y-1">
-                                    ${suggestion.team.map(member => `
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="text-gray-900 dark:text-white">${member.name}</span>
-                                            <span class="level-badge level-${member.level}">${member.level.toUpperCase()}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            
-                            <div>
-                                ${suggestion.conflicts.length > 0 ? `
-                                    <h5 class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">Potential Conflicts:</h5>
-                                    <div class="space-y-1">
-                                        ${suggestion.conflicts.map(conflict => `
-                                            <div class="text-xs text-red-600 dark:text-red-400">
-                                                ${conflict.member1} ↔ ${conflict.member2}
-                                                ${conflict.isNewMember ? ' (New member involved)' : ''}
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : `
-                                    <div class="text-sm text-green-600 dark:text-green-400">✓ No recent collaboration conflicts</div>
-                                `}
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            `;
-            
-            panel.classList.remove('hidden');
-        }
-
-        // Custom dialog functions (replacing alert/confirm)
-        function showAlert(message) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
-                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
-                    <div class="flex justify-end">
-                        <button class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded" onclick="this.closest('.fixed').remove()">OK</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function showConfirmDialog(message, onConfirm) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
-                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
-                    <div class="flex justify-end space-x-3">
-                        <button class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded" onclick="this.closest('.fixed').remove()">Cancel</button>
-                        <button class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded" onclick="this.closest('.fixed').remove(); (${onConfirm})()">Confirm</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        // Initialize the app
+        
+        // --- SCRIPT LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
-            renderMembers();
-            renderCollaborations();
+            const form = document.getElementById('staffingForm');
+            const resultsArea = document.getElementById('resultsArea');
+            const leadSelect = document.getElementById('leadSelect');
+            const talentPoolTable = document.getElementById('talentPoolTable');
+
+            // Map full names to first names for collaboration lookup
+            const nameMap = new Map();
+            employees.forEach(e => nameMap.set(e.name, e.name.split(' ')[0]));
+            const reverseNameMap = new Map();
+            employees.forEach(e => {
+                const firstName = e.name.split(' ')[0];
+                if (!reverseNameMap.has(firstName)) {
+                    reverseNameMap.set(firstName, e.name);
+                } else {
+                    // Handle duplicate first names if necessary
+                    if(e.name === "Jonathan Ruud") reverseNameMap.set("Jon Rudd", e.name);
+                    if(e.name === "Katie C Wilson") reverseNameMap.set("Katie W", e.name);
+                    if(e.name === "Dominik Freund") reverseNameMap.set("Dom", e.name);
+                }
+            });
+            // Manual fixes for ambiguous names in data
+            reverseNameMap.set("Jon Rudd", "Jonathan Ruud");
+            reverseNameMap.set("Katie W", "Katie C Wilson");
+            reverseNameMap.set("Dom", "Dominik Freund");
+
+
+            // Create a structured collaboration set for fast lookups
+            const collaborationHistory = new Map();
+            rawCollaborations.forEach(([p1, p2, project]) => {
+                const fullName1 = reverseNameMap.get(p1);
+                const fullName2 = reverseNameMap.get(p2);
+                if (fullName1 && fullName2) {
+                    const key = [fullName1, fullName2].sort().join('|');
+                    collaborationHistory.set(key, project);
+                }
+            });
+
+            // Populate UI elements
+            function populateUI() {
+                // Populate leads dropdown
+                employees.filter(e => e.iLevel >= 9).forEach(e => {
+                    const option = document.createElement('option');
+                    option.value = e.name;
+                    option.textContent = `${e.name} (i${e.iLevel})`;
+                    leadSelect.appendChild(option);
+                });
+
+                // Populate talent pool table
+                let talentHtml = '';
+                employees.forEach(e => {
+                    talentHtml += `
+                        <tr>
+                            <td>${e.name}</td>
+                            <td>${e.title}</td>
+                            <td><span class="i-level-tag i${e.iLevel}">i${e.iLevel}</span></td>
+                        </tr>
+                    `;
+                });
+                talentPoolTable.innerHTML = talentHtml;
+            }
+
+            // Main form submission handler
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                generateRecommendations();
+            });
+
+            function getRequirements() {
+                return {
+                    i10: parseInt(document.getElementById('req-i10').value) || 0,
+                    i9: parseInt(document.getElementById('req-i9').value) || 0,
+                    i8: parseInt(document.getElementById('req-i8').value) || 0,
+                    i7: parseInt(document.getElementById('req-i7').value) || 0,
+                    i6: parseInt(document.getElementById('req-i6').value) || 0,
+                    i5: parseInt(document.getElementById('req-i5').value) || 0,
+                };
+            }
+
+            function findTeamConflicts(team) {
+                const conflicts = [];
+                for (let i = 0; i < team.length; i++) {
+                    for (let j = i + 1; j < team.length; j++) {
+                        const key = [team[i].name, team[j].name].sort().join('|');
+                        if (collaborationHistory.has(key)) {
+                            conflicts.push({
+                                members: [team[i].name, team[j].name],
+                                project: collaborationHistory.get(key)
+                            });
+                        }
+                    }
+                }
+                return conflicts;
+            }
+
+            function calculateScore(conflicts) {
+                return conflicts.length * 100;
+            }
+            
+            function generateRecommendations() {
+                const requirements = getRequirements();
+                const assignedLeadName = leadSelect.value;
+                const allResults = [];
+                
+                const rolesToFill = [];
+                for (const level in requirements) {
+                    for (let i = 0; i < requirements[level]; i++) {
+                        rolesToFill.push(parseInt(level.substring(1)));
+                    }
+                }
+                rolesToFill.sort((a, b) => b - a); // Start with highest i-level
+
+                let potentialLeads = [];
+                if(assignedLeadName) {
+                    potentialLeads = [employees.find(e => e.name === assignedLeadName)];
+                } else {
+                    const leadLevel = rolesToFill[0];
+                    potentialLeads = employees.filter(e => e.iLevel === leadLevel);
+                }
+
+                potentialLeads.forEach(lead => {
+                    let availablePool = employees.filter(e => e.name !== lead.name);
+                    let currentTeam = [lead];
+                    let currentRolesToFill = [...rolesToFill].slice(1);
+                    
+                    let possible = true;
+                    for(const roleLevel of currentRolesToFill) {
+                        let candidates = availablePool.filter(e => e.iLevel === roleLevel);
+                        if (candidates.length === 0) {
+                            possible = false;
+                            break;
+                        }
+                        
+                        // Greedy choice: find candidate with minimum added conflicts
+                        let bestCandidate = null;
+                        let minAddedConflicts = Infinity;
+
+                        for (const candidate of candidates) {
+                            const tempTeam = [...currentTeam, candidate];
+                            const conflicts = findTeamConflicts(tempTeam);
+                            const addedConflicts = conflicts.length - findTeamConflicts(currentTeam).length;
+                            
+                            if (addedConflicts < minAddedConflicts) {
+                                minAddedConflicts = addedConflicts;
+                                bestCandidate = candidate;
+                            }
+                        }
+                        
+                        currentTeam.push(bestCandidate);
+                        availablePool = availablePool.filter(e => e.name !== bestCandidate.name);
+                    }
+                    
+                    if (possible) {
+                        const conflicts = findTeamConflicts(currentTeam);
+                        const score = calculateScore(conflicts);
+                        allResults.push({ team: currentTeam, conflicts, score });
+                    }
+                });
+
+                allResults.sort((a, b) => a.score - b.score);
+                const topResults = allResults.slice(0, 3);
+                renderResults(topResults);
+            }
+
+            function renderResults(results) {
+                resultsArea.innerHTML = ''; // Clear previous results
+
+                const header = document.createElement('h2');
+                header.textContent = '2. Review Recommendations';
+                resultsArea.appendChild(header);
+
+                if (results.length === 0) {
+                    resultsArea.innerHTML += '<p>Could not generate a valid team with the given constraints. Try adjusting the requirements.</p>';
+                    return;
+                }
+                
+                resultsArea.innerHTML += `<p>Top ${results.length} recommendations are listed below, ranked by the lowest Conflict Score.</p>`;
+
+                results.forEach((result, index) => {
+                    const isOptimal = index === 0 && result.score === 0;
+                    
+                    let conflictHTML = '';
+                    if (result.conflicts.length > 0) {
+                        const conflictList = result.conflicts.map(c => 
+                            `<li><b>${c.members.join(' & ')}</b> worked together on <i>${c.project}</i>.</li>`
+                        ).join('');
+                        conflictHTML = `
+                            <div class="conflict-section has-conflict">
+                                <h4>⚠️ ${result.conflicts.length} Collaboration Conflict(s) Detected:</h4>
+                                <ul>${conflictList}</ul>
+                            </div>
+                        `;
+                    } else {
+                        conflictHTML = `
+                            <div class="conflict-section no-conflict">
+                                <h4>✅ No collaboration conflicts detected.</h4>
+                                <p>This team composition introduces new working relationships.</p>
+                            </div>
+                        `;
+                    }
+                    
+                    const teamTableRows = result.team.map(member => `
+                        <tr>
+                            <td>${member.name}</td>
+                            <td><span class="i-level-tag i${member.iLevel}">i${member.iLevel}</span></td>
+                        </tr>`).join('');
+
+                    const cardHTML = `
+                        <div class="recommendation-card ${isOptimal ? 'optimal' : ''}">
+                            <div class="card-header">
+                                <h3>Recommendation ${index + 1}</h3>
+                                <span class="score ${result.score > 0 ? 'high-conflict' : 'low-conflict'}">
+                                    Conflict Score: ${result.score}
+                                </span>
+                            </div>
+                            <hr class="card-hr">
+                            <table class="team-table">
+                                <thead><tr><th>Name</th><th>Role</th></tr></thead>
+                                <tbody>${teamTableRows}</tbody>
+                            </table>
+                            ${conflictHTML}
+                        </div>
+                    `;
+                    resultsArea.innerHTML += cardHTML;
+                });
+            }
+
+            // Initial population
+            populateUI();
         });
     </script>
+
 </body>
 </html>
